@@ -1,0 +1,26 @@
+version: '3'
+services:
+  yansan-db-mongo:
+    image: mongo
+    expose:
+      - 27017
+    volumes:
+      - ./yansan-db/mongo/data:/data/db
+  yansan-crawler:
+    build: './yansan-crawler'
+    links:
+      - 'yansan-db-mongo'
+  yansan-web:
+    build: './yansan-web'
+    expose:
+      - 80
+    environment:
+      VIRTUAL_HOST: yansan-navi.garaku.work
+    links:
+      - 'yansan-db-mongo'
+
+networks:
+  default:
+    external:
+      name: proxy_link
+

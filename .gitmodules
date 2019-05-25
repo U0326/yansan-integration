@@ -1,0 +1,6 @@
+[submodule "yansan-crawler"]
+	path = yansan-crawler
+	url = https://github.com/U0326/yansan-crawler.git
+[submodule "yansan-web"]
+	path = yansan-web
+	url = https://github.com/U0326/yansan-web.git
