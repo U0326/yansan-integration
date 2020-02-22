@@ -17,11 +17,13 @@ cd ./yansan-integration
 docker-compose -f docker-compose-local.yml up
 ```
 ### 本番環境
-注)本番環境では、[こちら](https://github.com/U0326/garaku-proxy)のプロジェクトをフォワードプロキシとして用いています。  
+注)本番環境では、[こちら](https://github.com/U0326/garaku-proxy)のプロジェクトをリバースプロキシとして用いています。  
 以下手順で実行が可能です。
 ```
+// 事前に以下の通りネットワークを作成しておく必要があります。
+docker network create proxy_link
+
 git clone --recursive https://github.com/U0326/yansan-integration.git
 cd ./yansan-integration
 docker-compose up
 ```
-
