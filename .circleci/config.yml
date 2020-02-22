@@ -1,0 +1,41 @@
+version: 2.1
+jobs:
+  build:
+    machine:
+      image: circleci/classic:edge
+    steps:
+      - checkout
+      - run: git submodule update -i
+      - run: docker network create proxy_link
+      - run: docker-compose up -d
+  deploy:
+    machine:
+      image: circleci/classic:edge
+    steps:
+      - add_ssh_keys
+      - run: |
+          ssh ${USER_NAME}@${HOST_NAME} \<< EOF
+            cd 02_yansan-integration
+            git pull origin develop
+            git submodule update -i
+            sed -i "" -e "s/API_KEY = 'dummy_text'/API_KEY = ${YOUTUBE_API_KEY}/" ./yansan-crawler/video/youtube/const.py
+            docker-compose down --rm all
+            docker-compose up -d
+          EOF
+
+workflows:
+  version: 2.1
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - deploy:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/

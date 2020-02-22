@@ -8,22 +8,16 @@
 ## 要求事項
 Dockerを事前にインストールする必要があります。
 
-## 実行方法
-### ローカル
-以下手順で実行が可能です。
+## ローカルでの実行方法
 ```
 git clone --recursive https://github.com/U0326/yansan-integration.git
 cd ./yansan-integration
 docker-compose -f docker-compose-local.yml up
 ```
-### 本番環境
-注)本番環境では、[こちら](https://github.com/U0326/garaku-proxy)のプロジェクトをリバースプロキシとして用いています。  
-以下手順で実行が可能です。
-```
-// 事前に以下の通りネットワークを作成しておく必要があります。
-docker network create proxy_link
 
-git clone --recursive https://github.com/U0326/yansan-integration.git
-cd ./yansan-integration
-docker-compose up
+## 本番環境へのデプロイ
+CircleCIを用いており、以下形式のタグを発行すると自動で本番環境のへのデプロイが行われます。
 ```
+^v[0-9]+(\.[0-9]+)*
+```
+CircleCIの設定詳細は[こちら](./.circleci/config.yml)をご覧ください。
