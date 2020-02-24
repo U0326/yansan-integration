@@ -14,6 +14,7 @@ services:
     build: './yansan-web'
     expose:
       - 80
+    command: sh ./assets/docker_bootstrap.sh --production
     environment:
       VIRTUAL_HOST: yansan-navi.garaku.work
     links:
