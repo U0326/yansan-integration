@@ -6,19 +6,41 @@ jobs:
     steps:
       - checkout
       - run: git submodule update -i
+      - run: if [[ ${CIRCLE_TAG} ]]; then TAG=${CIRCLE_TAG}; fi
       - run: docker network create proxy_link
-      - run: docker-compose up -d
-  deploy:
-    machine:
-      image: circleci/classic:edge
+      - run: docker-compose -f docker-compose-local.yml up -d
+      - run: mkdir ./workspace
+      - run: docker save u0326/yansan-crawler > ./workspace/yansan-crawler.tar
+      - run: docker save u0326/yansan-web > ./workspace/yansan-web.tar
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - yansan-crawler.tar
+            - yansan-web.tar
+  push:
+    docker:
+      - image: buildpack-deps:trusty
     steps:
-      - add_ssh_keys
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: docker load < /tmp/workspace/yansan-crawler.tar
+      - run: docker load < /tmp/workspace/yansan-web.tar
+      - run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+      - run: docker push u0326/yansan-crawler:${CIRCLE_TAG}
+      - run: docker push u0326/yansan-web:${CIRCLE_TAG}
+  deploy:
+    docker:
+      - image: buildpack-deps:trusty
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "2c:4c:04:80:f1:6d:6e:56:14:72:7b:92:4d:f8:f5:1b"
+      - run: ssh-keyscan ${HOST_NAME} >> ~/.ssh/known_hosts
       - run: |
           ssh ${USER_NAME}@${HOST_NAME} \<< EOF
             cd 02_yansan-integration
             git pull origin develop
             git submodule update -i
-            sed -i "" -e "s/API_KEY = 'dummy_text'/API_KEY = ${YOUTUBE_API_KEY}/" ./yansan-crawler/video/youtube/const.py
             docker-compose down --rm all
             docker-compose up -d
           EOF
@@ -31,9 +53,17 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - deploy:
+      - push:
           requires:
             - build
+          filters:
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
+      - deploy:
+          requires:
+            - push
           filters:
             tags:
               only: /^v[0-9]+(\.[0-9]+)*/
