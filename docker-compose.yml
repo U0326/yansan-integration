@@ -5,13 +5,15 @@ services:
     expose:
       - 27017
     volumes:
-      - ./yansan-db/mongo/data:/data/db
+      - /home/garaku/02_yansan-integration/yansan-db/mongo/data:/data/db
   yansan-crawler:
-    build: './yansan-crawler'
+    image: u0326/yansan-crawler:${TAG}
+    environment:
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
     links:
       - 'yansan-db-mongo'
   yansan-web:
-    build: './yansan-web'
+    image: u0326/yansan-web:${TAG}
     expose:
       - 80
     command: sh ./assets/docker_bootstrap.sh --production
@@ -24,4 +26,3 @@ networks:
   default:
     external:
       name: proxy_link
-

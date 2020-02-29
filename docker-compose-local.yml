@@ -8,10 +8,14 @@ services:
       - ./yansan-db/mongo/data:/data/db
   yansan-crawler:
     build: './yansan-crawler'
+    image: u0326/yansan-crawler:${TAG}
+    environment:
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
     links:
       - 'yansan-db-mongo'
   yansan-web:
     build: './yansan-web'
+    image: u0326/yansan-web:${TAG}
     ports:
       - "5000:5000"
     command: sh ./assets/docker_bootstrap.sh --development
@@ -19,4 +23,3 @@ services:
       VIRTUAL_HOST: yansan-navi.garaku.work
     links:
       - 'yansan-db-mongo'
-
